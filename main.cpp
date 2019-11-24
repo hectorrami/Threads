@@ -4,8 +4,6 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include <ctype.h>
-#include <vector>
 #include <stack>
 using namespace std;
 
