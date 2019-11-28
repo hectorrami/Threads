@@ -8,33 +8,62 @@
 using namespace std;
 
 static pthread_mutex_t sem;
-static int turn = 1;
-static int current = 0;
 static pthread_cond_t myturn = PTHREAD_COND_INITIALIZER;
 
 struct data{
     int n[100];
+    char symbol;
     string message[100];
+    string Decompressed;
 };
 
 void *child_thread(void *arg){
 
     pthread_mutex_lock(&sem);
+    static int turn = 1;
+    static int current = 0;
     struct data *pos2 = (struct data *)arg;
     static int x;
     x = pos2->n[current];
     while(x != turn)
         pthread_cond_wait(&myturn, &sem);
-    cout << "I am thread #" << x << endl;
+    //cout << "I am thread #" << x << endl;
+    
+    
+    string temp = pos2->message[current];
+    string msg;
+    char symbol = temp[0];
+
+
+    cout << "Symbol : " << symbol << endl;
+    cout << "Binary : ";
+    for(int i =2 ; i< temp.size(); i++)
+        msg += temp[i];
+
+    cout << msg << endl;
+
+    /*If statement to insert if there is a 0 at that position*/
+   
+
     pthread_mutex_unlock(&sem);
 
-    //sleep(1);
+
 
     pthread_mutex_lock(&sem);
-    cout << "Thread #" << x << " ended" << endl;
+    //cout << "Thread #" << turn << " ended" << endl;
+
+
+    for(int i =0; i < msg.size(); i++){
+        if(msg[i] == '1')
+            msg[i] = symbol;
+    }
+
+    cout << "MSG: " << msg << endl;
+
     string str1 = pos2->message[current];
     string str2 = " Binary code = ";
     str1.insert(1,str2);
+
 
     //cout << str1 << endl;
     current++;
@@ -76,6 +105,7 @@ int main(){
         pthread_join(tid[i], NULL);
 
     cout << "Decompressed file components: " << endl;
+    //cout << pos.Decompressed << endl;
 
     return 0; 
 }
