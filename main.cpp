@@ -30,40 +30,34 @@ void *child_thread(void *arg){
     x = pos2->n[current];
     while(x != turn)
         pthread_cond_wait(&myturn, &sem);
-    //cout << "I am thread #" << x << endl;
+
     string temp;
     string msg;
     char symbol;
-    //cout << "Message here: " << pos2->str << endl;
+   
     temp = pos2->message[current];
     symbol = temp[0];
 
     if(symbol == '0')
         symbol = '%';
 
-    //cout << "Symbol : " << symbol << endl;
     for(int i =2 ; i< temp.size(); i++)
         msg += temp[i];
-    //cout << "Binary : ";
-    //cout << msg << endl;-
+    
     pthread_mutex_unlock(&sem);
 
     pthread_mutex_lock(&sem);
-    //cout << "Thread #" << turn << " ended" << endl;
     for(int i =0; i < msg.size(); i++){
         if(msg[i] == '1')
             msg[i] = symbol;
     }
 
-   //cout << "MSG: " << msg << endl;
-   for(int i =0 ; i < pos2->str.size(); i++){
-       
+   for(int i =0 ; i < pos2->str.size(); i++){  
        for(int j =0 ; j < msg.size(); j++)
             if(msg[j] == '0'){
                msg[j] = pos2->str[i];
                i++;
             }
-
    }
     pos2->str = msg;
 
@@ -87,19 +81,17 @@ void *child_thread(void *arg){
     turn++;
     pthread_cond_broadcast(&myturn);
     pthread_mutex_unlock(&sem);
+
     return NULL;
 }
 
 int main(){
-
     struct data pos;
     stack<string> str_stack;
     string encoded, input;
 
     while(getline(cin, input)){
-
         encoded = Encode(input);
-
         str_stack.push(encoded);
     }
     
@@ -125,14 +117,8 @@ int main(){
 
     /*prinT out the final decompressed message*/
     cout << "Decompressed file contents:" << endl;
-    // for(int x =0; x < pos.str.size(); x++){
-    //     if(pos.str[x] == '@')
-    //         cout << endl;
-    //     else
-    //         cout << pos.str[x];
-    // }
-
     cout << AddSpace(pos.str) << endl;
+
     return 0; 
 }
 
@@ -156,8 +142,6 @@ string Decode(string inputstring){
 }
 
 string AddSpace(string inputstring){
-    
-    
     size_t found = inputstring.find("@");
     while(found != string::npos){
         inputstring.replace(found, 1,"\n" );
@@ -168,8 +152,5 @@ string AddSpace(string inputstring){
         if(inputstring[i] == '%')
             inputstring[i] = '0';
     }
-
-
     return inputstring;
-
 }
