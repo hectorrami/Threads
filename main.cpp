@@ -16,6 +16,10 @@ struct data{
     string message[100];
 };
 
+string Encode(string inputstring);
+string Decode(string inputstring);
+string AddSpace(string inputstring);
+
 void *child_thread(void *arg){
 
     pthread_mutex_lock(&sem);
@@ -33,11 +37,15 @@ void *child_thread(void *arg){
     //cout << "Message here: " << pos2->str << endl;
     temp = pos2->message[current];
     symbol = temp[0];
+
+    if(symbol == '0')
+        symbol = '%';
+
     //cout << "Symbol : " << symbol << endl;
     for(int i =2 ; i< temp.size(); i++)
         msg += temp[i];
-    // cout << "Binary : ";
-    // cout << msg << endl;
+    //cout << "Binary : ";
+    //cout << msg << endl;-
     pthread_mutex_unlock(&sem);
 
     pthread_mutex_lock(&sem);
@@ -61,8 +69,19 @@ void *child_thread(void *arg){
 
     string str1 = pos2->message[current];
     string str2 = " Binary code = ";
+
+    if(str1[0] == '@')
+    {
+        str1 = Decode(pos2->message[current]);
+        str1.insert(5,str2);
+        cout << str1 << endl;
+    }
+
+    else
+    {   
     str1.insert(1,str2);
     cout << str1 << endl;
+    }
 
     current++;
     turn++;
@@ -75,12 +94,15 @@ int main(){
 
     struct data pos;
     stack<string> str_stack;
-    string input;
+    string encoded, input;
 
     while(getline(cin, input)){
-        str_stack.push(input);
+
+        encoded = Encode(input);
+
+        str_stack.push(encoded);
     }
-   
+    
     int NTHREADS = str_stack.size();
     pthread_t tid[NTHREADS];
     pthread_mutex_init(&sem, NULL); 
@@ -103,7 +125,51 @@ int main(){
 
     /*prinT out the final decompressed message*/
     cout << "Decompressed file contents:" << endl;
-    cout << pos.str << endl;
+    // for(int x =0; x < pos.str.size(); x++){
+    //     if(pos.str[x] == '@')
+    //         cout << endl;
+    //     else
+    //         cout << pos.str[x];
+    // }
 
+    cout << AddSpace(pos.str) << endl;
     return 0; 
+}
+
+
+string Encode(string inputstring){  
+    size_t found = inputstring.find("<EOL>");
+    while(found != string::npos){
+        inputstring.replace(found,5,"@");
+        found = inputstring.find("<EOL>");
+    }
+    return inputstring;
+}
+
+string Decode(string inputstring){
+    size_t found = inputstring.find("@");
+    while(found != string::npos){
+        inputstring.replace(found, 1,"<EOL>" );
+        found = inputstring.find("@");
+    }
+    return inputstring;
+}
+
+string AddSpace(string inputstring){
+    
+    
+    size_t found = inputstring.find("@");
+    while(found != string::npos){
+        inputstring.replace(found, 1,"\n" );
+        found = inputstring.find("@");
+    }
+
+    for(int i =0; i < inputstring.size(); i++){
+        if(inputstring[i] == '%')
+            inputstring[i] = '0';
+    }
+
+
+    return inputstring;
+
 }
